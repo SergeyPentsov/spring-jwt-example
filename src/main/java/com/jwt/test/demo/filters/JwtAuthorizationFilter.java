@@ -1,5 +1,6 @@
 package com.jwt.test.demo.filters;
 
+import com.jwt.test.demo.entity.TestUser;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -62,8 +63,11 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                         .map(authority -> new SimpleGrantedAuthority((String) authority))
                         .collect(Collectors.toList());
 
+                var userId = parsedToken.getBody()
+                        .get("id");
+
                 if (!StringUtils.isEmpty(username)) {
-                    return new UsernamePasswordAuthenticationToken(username, null, authorities);
+                    return new UsernamePasswordAuthenticationToken(new TestUser(Long.valueOf(userId.toString()), username, null), null, authorities);
                 }
             } catch (SignatureException exception) {
                 log.warn("JWT signature does not match locally computed signature : {} failed : {}", token, exception.getMessage());

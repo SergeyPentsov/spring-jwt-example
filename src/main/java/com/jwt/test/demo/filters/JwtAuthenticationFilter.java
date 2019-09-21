@@ -1,5 +1,6 @@
 package com.jwt.test.demo.filters;
 
+import com.jwt.test.demo.security.MyUserPrincipal;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -39,7 +40,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain filterChain, Authentication authentication) {
-        var user = ((User) authentication.getPrincipal());
+        var user = ((MyUserPrincipal) authentication.getPrincipal());
 
         var roles = user.getAuthorities()
                 .stream()
@@ -56,6 +57,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .setSubject(user.getUsername())
                 .setExpiration(new Date(System.currentTimeMillis() + 864000000))
                 .claim("rol", roles)
+                .claim("id",user.getUserId())
                 .compact();
 
         response.addHeader(SecurityConstants.TOKEN_HEADER, SecurityConstants.TOKEN_PREFIX + token);
